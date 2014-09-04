@@ -10,6 +10,7 @@
 #import "SYParents.h"
 #import "SYPredicateFilter.h"
 #import "SYClassFilter.h"
+#import "SYAntiClassFilter.h"
 #import "SYNthElementFilter.h"
 
 @interface SYSectionParser : NSObject {
@@ -264,7 +265,18 @@
     }else if( [[parsedSection args] count] == 1 ){
         if( [firstParam isEqualToString:@"view"] ) {
             NSString *firstArg = [[parsedSection args] objectAtIndex:0];
-            return [[[SYClassFilter alloc] initWithClass:(NSClassFromString(firstArg))] autorelease];
+
+            // if the class name is prepended with "!" character, we need anti-class filter
+            if ([firstArg hasPrefix:@"!"])
+            {
+                firstArg = [firstArg stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"!"]];
+                return [[[SYAntiClassFilter alloc] initWithClass:NSClassFromString(firstArg)] autorelease];
+            }
+            else
+            {
+                // otherwise, we need general class filter
+                return [[[SYClassFilter alloc] initWithClass:(NSClassFromString(firstArg))] autorelease];
+            }
         }else if( [firstParam isEqualToString:@"index"] ) {
             NSNumber *firstArg = [[parsedSection args] objectAtIndex:0];
             return [[[SYNthElementFilter alloc] initWithIndex:[firstArg unsignedIntValue]] autorelease];            
