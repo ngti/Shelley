@@ -32,6 +32,10 @@ BOOL substringMatch(NSString *actualString, NSString *expectedSubstring){
 }
 
 - (BOOL) isAnimating {
+    // special case: on iPad this class has animated flag set constantly when onscreen keyboard is displayed
+    if ([self isKindOfClass:NSClassFromString(@"UIKeyboardSliceTransitionView")])
+        return NO;
+
     if ([self respondsToSelector:@selector(motionEffects)]) {
         return (self.layer.animationKeys.count > [[self performSelector: @selector(motionEffects)] count]);
     }
