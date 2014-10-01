@@ -48,6 +48,50 @@ BOOL substringMatch(NSString *actualString, NSString *expectedSubstring){
     return ![self isAnimating];
 }
 
+- (UIColor *)colorOfCenterPoint
+{
+    // find width and height of the image to be rendered
+    NSUInteger width = self.layer.bounds.size.width;
+    NSUInteger height = self.layer.bounds.size.height;
+
+    // deterimne coordinates of the center point of the image
+    CGPoint center = CGPointMake(width / 2, height / 2);
+
+    // setup color space
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+
+    // allocate memory that the image data will be put into
+    unsigned char *rawData = malloc(height * width * 4);
+    
+    // create a CGBitmapContext to draw an image into
+    NSUInteger bytesPerPixel = 4;
+    NSUInteger bytesPerRow = bytesPerPixel * width;
+    NSUInteger bitsPerComponent = 8;
+    CGContextRef context = CGBitmapContextCreate(rawData, width, height,
+                                                 bitsPerComponent, bytesPerRow, colorSpace,
+                                                 kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+    CGColorSpaceRelease(colorSpace);
+    
+    // draw the image which will populate rawData
+    [self.layer renderInContext:context];
+    CGContextRelease(context);
+
+    long pixelIndex = (bytesPerRow * center.y) + center.x * bytesPerPixel;
+
+    // extract components in RBGA format (don't ask me why!)
+    CGFloat max = (CGFloat)0xff;
+
+    CGFloat red = (CGFloat)rawData[pixelIndex] / max;
+    CGFloat blue = (CGFloat)rawData[pixelIndex + 1] / max;
+    CGFloat green = (CGFloat)rawData[pixelIndex + 2] / max;
+    CGFloat alpha = (CGFloat)rawData[pixelIndex + 3] / max;
+
+    free(rawData);
+
+    // create and return color object
+    return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
+}
+
 @end
 
 @implementation UILabel (ShelleyExtensions)
