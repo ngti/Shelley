@@ -211,6 +211,8 @@
         shorthandClass = [UIButton class];
     else if( [firstParam isEqualToString:@"label"] )
         shorthandClass = [UILabel class];
+    else if( [firstParam isEqualToString:@"imageView"] )
+        shorthandClass = [UIImageView class];
     else if( [firstParam isEqualToString:@"alertView"] )
         shorthandClass = [UIAlertView class];
     else if( [firstParam isEqualToString:@"actionSheet"] )

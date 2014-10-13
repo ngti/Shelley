@@ -31,10 +31,30 @@ BOOL substringMatch(NSString *actualString, NSString *expectedSubstring){
     return [[self accessibilityLabel] isEqualToString:targetLabel];
 }
 
-- (BOOL) isAnimating {
+- (BOOL) FEX_isAnimating {
     // special case: on iPad this class has animated flag set constantly when onscreen keyboard is displayed
     if ([self isKindOfClass:NSClassFromString(@"UIKeyboardSliceTransitionView")])
         return NO;
+
+    // special case: if this is an UIImageView that is animating and if it is animating infinitely,
+    // ignore it since the function "wait_for_nothing_to_be_animating" will enter the infinite loop
+    if ([self isKindOfClass:[UIImageView class]])
+    {
+        UIImageView *imageView = (UIImageView *)self;
+        if ([imageView isAnimating])
+        {
+            return 0 != [imageView animationRepeatCount];
+        }
+    }
+    else
+    {
+        // special case: since we no longer access "isAnimating" method from target class directly,
+        // forward it to particular classes that implement this method
+        if ([self respondsToSelector:@selector(isAnimating)])
+        {
+            return [self performSelector:@selector(isAnimating) withObject:nil];
+        }
+    }
 
     if ([self respondsToSelector:@selector(motionEffects)]) {
         return (self.layer.animationKeys.count > [[self performSelector: @selector(motionEffects)] count]);
@@ -45,7 +65,7 @@ BOOL substringMatch(NSString *actualString, NSString *expectedSubstring){
 }
 
 - (BOOL) isNotAnimating {
-    return ![self isAnimating];
+    return ![self FEX_isAnimating];
 }
 
 - (UIColor *)colorOfCenterPoint

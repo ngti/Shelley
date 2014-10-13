@@ -54,7 +54,7 @@ BOOL substringMatch(NSString *actualString, NSString *expectedSubstring){
 
 @implementation NSView(SkelleyExtensions)
 
-- (BOOL) isAnimating {
+- (BOOL) FEX_isAnimating {
     return (self.layer.animationKeys.count > 0);
 }
 
